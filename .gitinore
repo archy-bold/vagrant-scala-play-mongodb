@@ -1,0 +1,4 @@
+.cache
+.vagrant
+.bash_history
+.sudo_as_admin_successful

@@ -8,22 +8,44 @@ echo 'deb http://downloads-distro.mongodb.org/repo/ubuntu-upstart dist 10gen' | 
 apt-get update
 apt-get install -y python-software-properties
 add-apt-repository -y ppa:webupd8team/java
-echo oracle-java7-installer shared/accepted-oracle-license-v1-1 select true | /usr/bin/debconf-set-selections
+echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | /usr/bin/debconf-set-selections
 
 # Update apt sources
 apt-get update
 
 # Install stuff available through apt-get
-apt-get install -y unzip wget git vim mongodb-10gen oracle-java7-installer oracle-java7-set-default
+apt-get install -y unzip wget git vim mongodb-10gen oracle-java8-installer oracle-java8-set-default samba samba-common cifs-utils
 
 # Install scala and play manually
 cd /opt
-wget http://www.scala-lang.org/files/archive/scala-2.10.3.tgz
-tar -zxvf scala-2.10.3.tgz
-wget http://downloads.typesafe.com/play/2.2.1/play-2.2.1.zip
-unzip play-2.2.1.zip
-chmod +x /opt/play-2.2.1/play
-chmod +x /opt/play-2.2.1/framework/build
-chmod -R a+rw /opt/play-2.2.1/*
+wget http://www.scala-lang.org/files/archive/scala-2.11.7.tgz
+tar -zxvf scala-2.11.7.tgz
+wget http://downloads.typesafe.com/typesafe-activator/1.3.5/typesafe-activator-1.3.5-minimal.zip
+unzip typesafe-activator-1.3.5-minimal.zip
+chmod +x /opt/activator-1.3.5-minimal
+chmod -R a+rw /opt/activator-1.3.5-minimal/*
 
-echo 'PATH=${PATH}:/opt/scala-2.10.3/bin:/opt/play-2.2.1' >> /etc/profile
+echo 'PATH=${PATH}:/opt/scala-2.11.7/bin:/opt/activator-1.3.5-minimal' >> /etc/profile
+
+# Set up Samba for sharing files to the host
+cat > /etc/samba/smb.conf <<'endmsg'
+[global]
+map to guest = bad user
+server string = scala
+guest account = vagrant
+
+[home]
+path = /home/vagrant
+public = Yes
+browseable = Yes
+writable = Yes
+read only = No
+guest ok = Yes
+guest only = Yes
+force user = vagrant
+force group = vagrant
+create mask = 0777
+directory mask = 0777
+endmsg
+
+service smbd restart

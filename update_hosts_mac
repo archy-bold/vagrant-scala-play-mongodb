@@ -1,0 +1,16 @@
+#!/bin/bash
+
+if [ $EUID != 0 ]; then
+ sudo -s "$0" "$@"
+ exit $?
+fi
+
+cd "$(dirname "$0")"
+
+IPADDRESS=192.168.33.11
+HOSTSFILE=/etc/hosts
+
+TRIMMED="$(grep -v "#vagrant$" $HOSTSFILE)"
+echo "$TRIMMED">$HOSTSFILE
+
+echo "$IPADDRESS scala.dev #vagrant">> $HOSTSFILE
